@@ -544,9 +544,9 @@ impl AgentRunCell {
             .any(|agent| matches!(agent.status_kind, AgentStatusKind::Running | AgentStatusKind::Pending));
 
         let text_value = if has_running_agents {
-            " [Ctrl+A] Expand · [Esc] Stop".to_string()
+            " [Ctrl+X] Expand · [Esc] Stop".to_string()
         } else {
-            " [Ctrl+A] Expand".to_string()
+            " [Ctrl+X] Expand".to_string()
         };
         let text = truncate_with_ellipsis(text_value.as_str(), body_width);
         let segment = CardSegment::new(text, hint_text_style(style));

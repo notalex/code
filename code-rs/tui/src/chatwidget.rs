@@ -4241,7 +4241,7 @@ impl ChatWidget<'_> {
             let _ = w.history_insert_plain_state_with_key(notice_state, notice_key, "prelude");
             if connecting_mcp && !w.test_mode {
                 // Render connecting status as a separate cell with standard gutter and spacing
-                w.history_push_top_next_req(history_cell::new_connecting_mcp_status());
+                w.push_background_before_next_output("\nConnecting MCP servers…");
             }
             // Mark welcome as shown to avoid duplicating the Popular commands section
             // when SessionConfigured arrives shortly after.
@@ -5075,16 +5075,16 @@ impl ChatWidget<'_> {
             return;
         }
         if self.browser_overlay_visible {
-            let is_ctrl_b = matches!(
+            let is_ctrl_q = matches!(
                 key_event,
                 KeyEvent {
-                    code: crossterm::event::KeyCode::Char('b'),
+                    code: crossterm::event::KeyCode::Char('q'),
                     modifiers: crossterm::event::KeyModifiers::CONTROL,
                     kind: KeyEventKind::Press | KeyEventKind::Repeat,
                     ..
                 }
             );
-            if is_ctrl_b {
+            if is_ctrl_q {
                 self.toggle_browser_overlay();
                 return;
             }
@@ -5119,10 +5119,10 @@ impl ChatWidget<'_> {
         }
 
         // Global overlays (avoid conflicting with common editor keys):
-        // - Ctrl+B: toggle Browser overlay
-        // - Ctrl+A: toggle Agents terminal mode
+        // - Ctrl+Q: toggle Browser overlay
+        // - Ctrl+X: toggle Agents terminal mode
         if let KeyEvent {
-            code: crossterm::event::KeyCode::Char('b'),
+            code: crossterm::event::KeyCode::Char('q'),
             modifiers: crossterm::event::KeyModifiers::CONTROL,
             kind: KeyEventKind::Press | KeyEventKind::Repeat,
             ..
@@ -5132,7 +5132,7 @@ impl ChatWidget<'_> {
             return;
         }
         if let KeyEvent {
-            code: crossterm::event::KeyCode::Char('a'),
+            code: crossterm::event::KeyCode::Char('x'),
             modifiers: crossterm::event::KeyModifiers::CONTROL,
             kind: KeyEventKind::Press | KeyEventKind::Repeat,
             ..
@@ -17016,7 +17016,7 @@ Have we met every part of this goal and is there no further work to do?"#
         ));
 
         // Global
-        lines.push(kv("Ctrl+H", "Help overlay"));
+        lines.push(kv("Ctrl+G", "Help overlay"));
         lines.push(kv("Ctrl+R", "Toggle reasoning"));
         lines.push(kv("Ctrl+T", "Toggle screen"));
         lines.push(kv("Ctrl+D", "Diff viewer"));
@@ -17069,8 +17069,8 @@ Have we met every part of this goal and is there no further work to do?"#
             "Panels",
             t_fg.add_modifier(Modifier::BOLD),
         )]));
-        lines.push(kv("Ctrl+B", "Toggle Browser overlay"));
-        lines.push(kv("Ctrl+A", "Open Agents terminal"));
+        lines.push(kv("Ctrl+Q", "Toggle Browser overlay"));
+        lines.push(kv("Ctrl+X", "Open Agents terminal"));
 
         // Slash command reference
         lines.push(RtLine::from(""));
@@ -28252,7 +28252,7 @@ impl ChatWidget<'_> {
 
         let title_spans = vec![
             Span::styled(" Agents ", Style::default().fg(crate::colors::text())),
-            Span::styled("— Ctrl+A to close", Style::default().fg(crate::colors::text_dim())),
+            Span::styled("— Ctrl+X to close", Style::default().fg(crate::colors::text_dim())),
         ];
 
         let block = Block::default()
@@ -28813,7 +28813,7 @@ impl ChatWidget<'_> {
         left_spans.push(Span::raw(" "));
         left_spans.push(Span::raw(summary));
         let right_spans: Vec<Span> = vec![
-            Span::from("Ctrl+A").style(key_hint_style),
+            Span::from("Ctrl+X").style(key_hint_style),
             Span::styled(" open terminal", label_style),
         ];
         let measure =
