@@ -61,6 +61,13 @@ pub enum Op {
         items: Vec<InputItem>,
     },
 
+    /// Queue user input to be appended to the next model request without
+    /// interrupting the current turn.
+    QueueUserInput {
+        /// User input items, see `InputItem`
+        items: Vec<InputItem>,
+    },
+
     /// Similar to [`Op::UserInput`], but contains additional context required
     /// for a turn of a [`crate::codex_conversation::CodexConversation`].
     UserTurn {
@@ -132,6 +139,15 @@ pub enum Op {
         decision: ReviewDecision,
     },
 
+    /// Register a command pattern as approved for the remainder of the session.
+    RegisterApprovedCommand {
+        command: Vec<String>,
+        match_kind: ApprovedCommandMatchKind,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        semantic_prefix: Option<Vec<String>>,
+    },
+
     /// Approve a code patch
     PatchApproval {
         /// The id of the submission we are approving
@@ -201,6 +217,13 @@ pub enum AskForApproval {
     /// Never ask the user to approve commands. Failures are immediately returned
     /// to the model, and never escalated to the user for approval.
     Never,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, Hash, TS)]
+#[serde(rename_all = "kebab-case")]
+pub enum ApprovedCommandMatchKind {
+    Exact,
+    Prefix,
 }
 
 /// Determines execution restrictions for model shell commands.
@@ -1276,6 +1299,7 @@ pub struct TurnAbortedEvent {
 pub enum TurnAbortReason {
     Interrupted,
     Replaced,
+    ReviewEnded,
 }
 
 #[cfg(test)]
@@ -1288,7 +1312,8 @@ mod tests {
     /// amount of nesting.
     #[test]
     fn serialize_event() {
-        let conversation_id = ConversationId(uuid::uuid!("67e55044-10b1-426f-9247-bb680e5fe0c8"));
+        let conversation_id =
+            ConversationId::from_string("67e55044-10b1-426f-9247-bb680e5fe0c8").unwrap();
         let rollout_file = NamedTempFile::new().unwrap();
         let event = Event {
             id: "1234".to_string(),
